@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+from datetime import datetime
+from hashlib import md5
+from tg import url, config
+import json
+from urllib import urlopen, urlencode
+from contextlib import closing
+
+def get_user_gravatar(user):
+    if not isinstance(user, basestring):
+        user = user.email_address
+    mhash = md5(user).hexdigest()
+    return url('http://www.gravatar.com/avatar/'+mhash, params=dict(s=32))
+
+def get_user_avatar(user):
+    author_pic = getattr(user, 'avatar', None)
+    if author_pic is None:
+        author_pic = get_user_gravatar(user)
+        fbauth = getattr(user, 'fbauth', None)
+        if fbauth:
+            author_pic = fbauth.profile_picture + '?type=large'
+    return author_pic
+
+def notify_comment_on_facebook(url, comment):
+    notify_faceook = config['_pluggable_tgcomments_config'].get('notify_facebook', True)
+    if not notify_faceook:
+        return
+
+    user = comment.user
+    if not user:
+        return
+
+    fbauth = getattr(user, 'fbauth', None)
+    if not fbauth:
+        return
+
+    #check if facebook token has expired
+    if not fbauth.access_token_expiry or datetime.now() >= fbauth.access_token_expiry:
+        return
+
+    url = 'https://graph.facebook.com/me/feed?access_token=%s' % fbauth.access_token
+    data = {'link':url,
+            'title':'%s posted a new comment' % comment.author_name,
+            'message':comment.body}
+
+    with closing(urlopen(url, urlencode(data))) as fbanswer:
+        return json.loads(fbanswer.read())
+

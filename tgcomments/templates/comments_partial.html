@@ -1,0 +1,47 @@
+<div xmlns:py="http://genshi.edgewall.org/"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     class="tgcomments_box">
+    <div class="tgcomments_form" py:if="request.identity or allow_anonymous">
+        <form action="${h.plug_url('tgcomments', '/new')}" method="POST">
+            <input type="hidden" name="entity_type" value="${entity_type}"/>
+            <input type="hidden" name="entity_id" value="${entity_id}"/>
+            <table>
+                <tr py:if="not request.identity">
+                    <td class="tgcomments_form_label">Author:</td>
+                    <td><input type="text" name="author"/></td>
+                </tr>
+                <tr py:if="not request.identity">
+                    <td class="tgcomments_form_label">Email:</td>
+                    <td><input type="text" name="email"/></td>
+                </tr>
+                <tr py:if="request.identity">
+                    <td><img style="width:32px;"
+                             src="${h.tgcomments.get_user_avatar(request.identity['user'])}"/></td>
+                    <td>${request.identity['user'].display_name}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <textarea name="body" placeholder="post your comment here"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="submit" value="Submit"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="tgcomments_comments">
+        <div class="tgcomments_comment" py:for="comment in comments">
+            <div class="tgcomments_comment_head">
+                <div class="tgcomments_comment_avatar">
+                    <img style="width:32px;" src="${comment.author_pic}"/>
+                </div>
+                <div class="tgcomments_comment_author">
+                    ${comment.author_name}
+                </div>
+            </div>
+            <div class="tgcomments_comment_body">${comment.body}</div>
+        </div>
+    </div>
+</div>
