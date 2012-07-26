@@ -40,10 +40,7 @@ def notify_comment_on_facebook(url, comment):
         return
 
     fburl = 'https://graph.facebook.com/me/feed?access_token=%s' % fbauth.access_token
-    data = {'link':url,
-            'title':'%s posted a new comment' % comment.author_name,
-            'message':comment.body}
-
+    data = {'link':url, 'message':comment.body}
     with closing(urlopen(fburl, urlencode(data))) as fbanswer:
         return json.loads(fbanswer.read())
 
