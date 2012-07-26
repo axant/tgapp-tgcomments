@@ -39,7 +39,7 @@
                 </div>
                 <div class="tgcomments_comment_author">
                     ${comment.author_name}
-                    <a py:if="request.identity and 'tgcomments_manager' in request.identity['groups']"
+                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
                        href="${h.plug_url('tgcomments', '/delete/%s'%comment.uid)}"
                        onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
                         <img src="${tg.url('/_pluggable/tgcomments/images/trash.gif')}"/>

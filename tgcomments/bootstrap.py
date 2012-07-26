@@ -7,7 +7,7 @@ from tgext.pluggable import app_model
 def bootstrap(command, conf, vars):
     print 'Bootstrapping tgcomments...'
 
-    g = app_model.Group(group_name='tgcomments_manager', display_name='TGComments manager')
+    g = app_model.Group(group_name='tgcmanager', display_name='TGComments manager')
     model.DBSession.add(g)
     model.DBSession.flush()
 

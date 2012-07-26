@@ -60,7 +60,7 @@ class RootController(TGController):
         return back_to_referer(success=True)
 
     @expose()
-    @require(predicates.in_group('tgcomments_manager'))
+    @require(predicates.in_group('tgcmanager'))
     @validate({'comment':SQLAEntityConverter(Comment)},
               error_handler=fail_with(404))
     def delete(self, comment):
