@@ -19,7 +19,7 @@ def get_user_avatar(user):
         author_pic = get_user_gravatar(user)
         fbauth = getattr(user, 'fbauth', None)
         if fbauth:
-            author_pic = fbauth.profile_picture + '?type=large'
+            author_pic = fbauth.profile_picture
     return author_pic
 
 def notify_comment_on_facebook(url, comment):
