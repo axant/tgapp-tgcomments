@@ -39,12 +39,12 @@ def notify_comment_on_facebook(url, comment):
     if not fbauth.access_token_expiry or datetime.now() >= fbauth.access_token_expiry:
         return
 
-    url = 'https://graph.facebook.com/me/feed?access_token=%s' % fbauth.access_token
+    fburl = 'https://graph.facebook.com/me/feed?access_token=%s' % fbauth.access_token
     data = {'link':url,
             'title':'%s posted a new comment' % comment.author_name,
             'message':comment.body}
 
-    with closing(urlopen(url, urlencode(data))) as fbanswer:
+    with closing(urlopen(fburl, urlencode(data))) as fbanswer:
         return json.loads(fbanswer.read())
 
 class FakeCommentEntity(object):
