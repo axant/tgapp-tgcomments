@@ -5,6 +5,7 @@ from tg import url, config
 import json
 from urllib import urlopen, urlencode
 from contextlib import closing
+from collections import namedtuple
 
 def get_user_gravatar(user):
     if not isinstance(user, basestring):
@@ -46,3 +47,13 @@ def notify_comment_on_facebook(url, comment):
     with closing(urlopen(url, urlencode(data))) as fbanswer:
         return json.loads(fbanswer.read())
 
+class FakeCommentEntity(object):
+    class __mapper__(object):
+        primary_key = [namedtuple('FakeColumn', ['key'])('uid')]
+
+    def __init__(self, uid):
+        self.uid = uid
+
+def make_fake_comment_entity(entity_type, entity_id):
+    fake_comment_type = type(entity_type.__name__, (FakeCommentEntity,), {})
+    return fake_comment_type(entity_id)

@@ -2,13 +2,13 @@
 """Main Controller"""
 
 from tg import TGController
-from tg import expose, flash, require, url, lurl, request, redirect, validate
+from tg import expose, flash, require, url, lurl, request, redirect, validate, config
 from tg.exceptions import HTTPForbidden, HTTPRedirection
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
 from tgcomments.model import DBSession, Comment
-from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook
+from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
 
 from tgext.pluggable import app_model
 
@@ -31,16 +31,18 @@ class RootController(TGController):
         if entity_type is None or entity_id is None:
             return back_to_referer()
 
-        entity = DBSession.query(entity_type).get(entity_id)
-        if not entity:
-            return back_to_referer()
+        if issubclass(entity_type, FakeCommentEntity):
+            entity = make_fake_comment_entity(entity_type, entity_id)
+        else:
+            entity = DBSession.query(entity_type).get(entity_id)
+            if not entity:
+                return back_to_referer()
 
         if not request.identity:
             try:
                 user = {'name':String(not_empty=True).to_python(kw.get('author')),
                         'avatar':get_user_gravatar(Email(not_empty=True).to_python(kw.get('email')))}
-            except Invalid, e:
-                print e
+            except Invalid:
                 return back_to_referer()
         else:
             user = request.identity['user']
