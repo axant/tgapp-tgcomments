@@ -1,3 +1,4 @@
+from sqlalchemy.schema import Index
 import tg
 
 from sqlalchemy import Table, ForeignKey, Column
@@ -12,6 +13,7 @@ from datetime import datetime
 
 class Comment(DeclarativeBase):
     __tablename__ = 'tgcomments_comments'
+    __table_args__ = (Index('idx_commented_entity', "entity_type", "entity_id"), )
 
     uid = Column(Integer, autoincrement=True, primary_key=True)
 

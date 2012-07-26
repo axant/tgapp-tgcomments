@@ -10,9 +10,16 @@ from tgcomments import model
 from tgcomments.model import DBSession, Comment
 from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
 
+try:
+    from tg import predicates
+except ImportError:
+    from repoze.what import predicates
+
 from tgext.pluggable import app_model
 
 from formencode.validators import Email, String, Invalid
+from tgext.datahelpers.validators import SQLAEntityConverter
+from tgext.datahelpers.utils import fail_with
 
 def back_to_referer(*args, **kw):
     if not kw.get('success'):
@@ -52,3 +59,11 @@ class RootController(TGController):
         flash('Comment Added')
         return back_to_referer(success=True)
 
+    @expose()
+    @require(predicates.in_group('tgcomments_manager'))
+    @validate({'comment':SQLAEntityConverter(Comment)},
+              error_handler=fail_with(404))
+    def delete(self, comment):
+        DBSession.delete(comment)
+        flash('Comment Deleted')
+        return back_to_referer(success=True)
