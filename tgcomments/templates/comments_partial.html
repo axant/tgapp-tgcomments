@@ -15,7 +15,7 @@
                     <td><input type="text" name="email"/></td>
                 </tr>
                 <tr py:if="request.identity">
-                    <td><img style="width:32px;"
+                    <td><img style="height:32px;"
                              src="${h.tgcomments.get_user_avatar(request.identity['user'])}"/></td>
                     <td>${request.identity['user'].display_name}</td>
                 </tr>
