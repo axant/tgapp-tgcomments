@@ -11,7 +11,7 @@ except ImportError:
 install_requires=[
     "TurboGears2 >= 2.1.4",
     "tgext.pluggable",
-    'tgext.datahelpers'
+    'tgext.datahelpers >= 0.0.6'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -27,7 +27,7 @@ setup(
     long_description=README,
     author='Alessandro Molina',
     author_email='alessandro.molina@axant.it',
-    #url='',
+    url='https://bitbucket.org/_amol_/tgapp-tgcomments',
     keywords='turbogears2.application',
     setup_requires=["PasteScript >= 1.7"],
     paster_plugins=[],
