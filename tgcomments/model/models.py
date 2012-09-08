@@ -2,7 +2,7 @@ from sqlalchemy.schema import Index
 import tg
 
 from sqlalchemy import Table, ForeignKey, Column
-from sqlalchemy.types import Unicode, Integer, DateTime, UnicodeText
+from sqlalchemy.types import Unicode, Integer, DateTime, UnicodeText, Boolean
 from sqlalchemy.orm import backref, relation
 
 from tgcomments.model import DeclarativeBase, DBSession
@@ -19,6 +19,7 @@ class Comment(DeclarativeBase):
 
     body = Column(UnicodeText, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
+    hidden = Column(Boolean, default=False, nullable=False)
 
     user_id = Column(Integer, ForeignKey(primary_key(app_model.User)), nullable=True)
     user = relation(app_model.User, backref=backref('comments'))
@@ -36,12 +37,17 @@ class Comment(DeclarativeBase):
         return Type.__name__, getattr(entity, type_primary_key.key)
 
     @classmethod
-    def comments_for(cls, entity):
+    def comments_for(cls, entity, hidden='auto'):
         entity_type, entity_id = cls.get_entity_descriptor(entity)
 
-        return DBSession.query(cls).filter_by(entity_type=entity_type)\
-                                   .filter_by(entity_id=entity_id)\
-                                   .order_by(cls.created_at.desc()).all()
+        comments = DBSession.query(cls).filter_by(entity_type=entity_type)\
+                                       .filter_by(entity_id=entity_id)
+
+        if not (hidden==True or \
+                (hidden=='auto' and tg.request.identity and 'tgcmanager' in tg.request.identity['groups'])):
+            comments = comments.filter_by(hidden==False)
+
+        return comments.order_by(cls.created_at.desc()).all()
 
     @classmethod
     def add_comment(cls, entity, user, body):

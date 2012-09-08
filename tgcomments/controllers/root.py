@@ -56,7 +56,7 @@ class RootController(TGController):
 
         c = Comment.add_comment(entity, user, kw['body'])
         notify_comment_on_facebook(request.referer, c)
-        flash('Comment Added')
+        flash(_('Comment Added'))
         return back_to_referer(success=True)
 
     @expose()
@@ -65,5 +65,17 @@ class RootController(TGController):
               error_handler=fail_with(404))
     def delete(self, comment):
         DBSession.delete(comment)
-        flash('Comment Deleted')
+        flash(_('Comment Deleted'))
+        return back_to_referer(success=True)
+
+    @expose()
+    @require(predicates.in_group('tgcmanager'))
+    @validate({'comment':SQLAEntityConverter(Comment)},
+              error_handler=fail_with(404))
+    def hide(self, comment):
+        comment.hidden = not comment.hidden
+        if comment.hidden:
+            flash(_('Comment Hidden'))
+        else:
+            flash(_('Comment Displayed'))
         return back_to_referer(success=True)

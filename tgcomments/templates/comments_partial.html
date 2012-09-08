@@ -32,13 +32,17 @@
         </form>
     </div>
     <div class="tgcomments_comments">
-        <div class="tgcomments_comment" py:for="comment in comments">
+        <div py:for="comment in comments" class="tgcomments_comment ${comment.hidden and 'tgcomments_hidden' or ''}">
             <div class="tgcomments_comment_head">
                 <div class="tgcomments_comment_avatar">
                     <img style="height:32px;" src="${comment.author_pic}"/>
                 </div>
-                <div class="tgcomments_comment_author">
-                    ${comment.author_name}
+                <div class="tgcomments_comment_author ${}">
+                    <span>${comment.author_name}</span>
+                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
+                       href="${h.plug_url('tgcomments', '/hide/%s'%comment.uid)}">
+                        <img src="${tg.url('/_pluggable/tgcomments/images/hide.gif')}"/>
+                    </a>
                     <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
                        href="${h.plug_url('tgcomments', '/delete/%s'%comment.uid)}"
                        onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
