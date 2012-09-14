@@ -45,7 +45,7 @@ class Comment(DeclarativeBase):
 
         if not (hidden==True or \
                 (hidden=='auto' and tg.request.identity and 'tgcmanager' in tg.request.identity['groups'])):
-            comments = comments.filter_by(hidden==False)
+            comments = comments.filter_by(hidden=False)
 
         return comments.order_by(cls.created_at.desc()).all()
 
