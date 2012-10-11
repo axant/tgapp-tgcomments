@@ -7,7 +7,7 @@ from tg.exceptions import HTTPForbidden, HTTPRedirection
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
-from tgcomments.model import DBSession, Comment
+from tgcomments.model import DBSession, Comment, CommentVote
 from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
 
 try:
@@ -17,7 +17,7 @@ except ImportError:
 
 from tgext.pluggable import app_model
 
-from formencode.validators import Email, String, Invalid
+from formencode.validators import Email, String, Invalid, Int
 from tgext.datahelpers.validators import SQLAEntityConverter
 from tgext.datahelpers.utils import fail_with
 
@@ -79,3 +79,25 @@ class RootController(TGController):
         else:
             flash(_('Comment Displayed'))
         return back_to_referer(success=True)
+
+    @expose()
+    @require(predicates.not_anonymous())
+    @validate({'comment':SQLAEntityConverter(Comment),
+               'value':Int(not_empty=True)},
+              error_handler=fail_with(403))
+    def vote(self, comment, value):
+        user = request.identity['user']
+
+        vote = DBSession.query(CommentVote).filter_by(comment=comment).filter_by(user=user).first()
+        if not vote:
+            vote = CommentVote(comment=comment, user=user)
+            DBSession.add(vote)
+
+        votes_range = config['_pluggable_tgcomments_config'].get('votes_range', (-1, 1))
+        min_vote_value = votes_range[0]
+        max_vote_value = votes_range[1]
+
+        vote.value = min(max(min_vote_value, value), max_vote_value)
+        flash(_('Thanks for your vote!'))
+        return back_to_referer(success=True)
+

@@ -2,7 +2,7 @@ from sqlalchemy.schema import Index
 import tg
 
 from sqlalchemy import Table, ForeignKey, Column
-from sqlalchemy.types import Unicode, Integer, DateTime, UnicodeText, Boolean
+from sqlalchemy.types import Unicode, Integer, DateTime, UnicodeText, Boolean, String
 from sqlalchemy.orm import backref, relation
 
 from tgcomments.model import DeclarativeBase, DBSession
@@ -29,6 +29,17 @@ class Comment(DeclarativeBase):
 
     entity_id = Column(Integer, nullable=False, index=True)
     entity_type = Column(Unicode(255), nullable=False, index=True)
+
+    @property
+    def voters(self):
+        return DBSession.query(app_model.User).join(CommentVote).filter(CommentVote.comment_id==self.uid)
+
+    @property
+    def rank(self):
+        sum((v.value for v in self.votes))
+
+    def votes_by_value(self, v):
+        return DBSession.query(CommentVote).filter_by(comment_id=self.uid).filter_by(value=v)
 
     @classmethod
     def get_entity_descriptor(cls, entity):
@@ -64,5 +75,19 @@ class Comment(DeclarativeBase):
 
         DBSession.add(c)
         return c
+
+class CommentVote(DeclarativeBase):
+    __tablename__ = 'tgcomments_comments_votes'
+    __table_args__ = (Index('idx_comment_voter', "comment_id", "user_id", unique=True), )
+
+    uid = Column(Integer, autoincrement=True, primary_key=True)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    value = Column(Integer, default=1)
+
+    user_id = Column(Integer, ForeignKey(primary_key(app_model.User)), nullable=False)
+    user = relation(app_model.User, backref=backref('comments_votes'))
+
+    comment_id = Column(Integer, ForeignKey(Comment.uid), nullable=False)
+    comment = relation(Comment, backref=backref('votes'))
 
 
