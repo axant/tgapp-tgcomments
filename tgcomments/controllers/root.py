@@ -24,7 +24,9 @@ from tgext.datahelpers.utils import fail_with
 def back_to_referer(*args, **kw):
     if not kw.get('success'):
         flash('Failed to post comment', 'error')
-    raise redirect(request.referer)
+    if request.referer is not None:
+        raise redirect(request.referer)
+    raise redirect(request.host_url)
 
 class RootController(TGController):
     @expose()
