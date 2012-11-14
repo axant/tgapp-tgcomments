@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
+from sqlalchemy.exc import IntegrityError
 
 from tg import TGController
 from tg import expose, flash, require, url, lurl, request, redirect, validate, config
@@ -9,6 +10,7 @@ from tg.i18n import ugettext as _, lazy_ugettext as l_
 from tgcomments import model
 from tgcomments.model import DBSession, Comment, CommentVote
 from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
+import transaction
 
 try:
     from tg import predicates
@@ -88,10 +90,10 @@ class RootController(TGController):
                'value':Int(not_empty=True)},
               error_handler=fail_with(403))
     def vote(self, comment, value):
+        transaction.begin()
         user = request.identity['user']
-
-        vote = DBSession.query(CommentVote).filter_by(comment=comment).filter_by(user=user).first()
-        if not vote:
+        vote = DBSession.query(CommentVote).filter_by(comment=comment, user=user).first()
+        if vote is None:
             vote = CommentVote(comment=comment, user=user)
             DBSession.add(vote)
 
@@ -100,6 +102,13 @@ class RootController(TGController):
         max_vote_value = votes_range[1]
 
         vote.value = min(max(min_vote_value, value), max_vote_value)
+
+        try:
+            DBSession.flush()
+            transaction.commit()
+        except IntegrityError:
+            return back_to_referer(success=False)
+
         flash(_('Thanks for your vote!'))
         return back_to_referer(success=True)
 
