@@ -86,7 +86,6 @@ class RootController(TGController):
                'value':Int(not_empty=True)},
               error_handler=fail_with(403))
     def vote(self, comment, value):
-        transaction.begin()
         user = request.identity['user']
         vote = DBSession.query(CommentVote).filter_by(comment=comment, user=user).first()
         if vote is None:
