@@ -25,7 +25,7 @@ from tgext.datahelpers.utils import fail_with
 
 def back_to_referer(*args, **kw):
     if not kw.get('success'):
-        flash('Failed to post comment', 'error')
+        flash(_('Failed to post comment'), 'error')
     if request.referer is not None:
         raise redirect(request.referer)
     raise redirect(request.host_url)
@@ -105,9 +105,10 @@ class RootController(TGController):
 
         try:
             DBSession.flush()
-            transaction.commit()
         except IntegrityError:
-            return back_to_referer(success=False)
+            transaction.doom()
+            flash(_('Already voted this comment'), 'warning')
+            return back_to_referer(success=True)
 
         flash(_('Thanks for your vote!'))
         return back_to_referer(success=True)
