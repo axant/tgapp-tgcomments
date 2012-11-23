@@ -36,7 +36,7 @@ class Comment(DeclarativeBase):
 
     @property
     def rank(self):
-        sum((v.value for v in self.votes))
+        return sum((v.value for v in self.votes))
 
     def votes_by_value(self, v):
         return DBSession.query(CommentVote).filter_by(comment_id=self.uid).filter_by(value=v)
