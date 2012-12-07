@@ -23,7 +23,7 @@ from formencode.validators import Email, String, Invalid, Int
 from tgext.datahelpers.validators import SQLAEntityConverter
 from tgext.datahelpers.utils import fail_with
 
-def back_to_referer(message=None, status='ok'):
+def back_to_referer(message=None, status='ok', *args, **kw):
     if message:
         flash(message, status)
     if request.referer is not None:
