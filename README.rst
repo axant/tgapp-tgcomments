@@ -13,7 +13,7 @@ Installing
 
 tgcomments can be installed both from pypi or from bitbucket::
 
-    easy_install tgcomments
+    pip install tgapp-tgcomments
 
 should just work for most of the users
 
@@ -28,8 +28,9 @@ Then at the *end of the file* call plug with tgcomments::
 
     plug(base_config, 'tgcomments')
 
-You will be able to access the registration process at
-*http://localhost:8080/tgcomments*.
+To expose ecomments support for an entity, just call the
+``comments_for`` partial for that entity inside your
+templates as explained in the *Exposed Partials* section.
 
 Exposed Partials
 ----------------------
