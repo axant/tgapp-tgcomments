@@ -28,9 +28,11 @@ Then at the *end of the file* call plug with tgcomments::
 
     plug(base_config, 'tgcomments')
 
-To expose ecomments support for an entity, just call the
- ``comments_for`` partial for that entity inside your
-templates as explained in the **Exposed Partials** section.
+
+To expose comments support for an entity, just call 
+the ``comments_for(entity)``  partial for 
+that entity inside your templates as explained in the 
+**Exposed Partials** section.
 
 Exposed Partials
 ----------------------
