@@ -30,12 +30,16 @@ def back_to_referer(message=None, status='ok', *args, **kw):
         raise redirect(request.referer)
     raise redirect(request.host_url)
 
+
 class RootController(TGController):
+    def new_error_handler(self, *args, **kwargs):
+        back_to_referer(l_('Please provide comment details'), 'error')
+
     @expose()
     @validate({'entity_type':String(not_empty=True),
                'entity_id':String(not_empty=True),
                'body':String(not_empty=True)},
-              error_handler=back_to_referer)
+              error_handler=new_error_handler)
     def new(self, **kw):
         entity_type = getattr(app_model, kw['entity_type'], None)
         entity_id = kw['entity_id']
@@ -54,7 +58,7 @@ class RootController(TGController):
                 user = {'name':String(not_empty=True).to_python(kw.get('author')),
                         'avatar':get_user_gravatar(Email(not_empty=True).to_python(kw.get('email')))}
             except Invalid:
-                return back_to_referer(_('Failed to post comment'), status='error')
+                return back_to_referer(_('Invalid Comment Author'), status='error')
         else:
             user = request.identity['user']
 
