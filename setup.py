@@ -29,7 +29,7 @@ setup(
     author_email='alessandro.molina@axant.it',
     url='https://bitbucket.org/_amol_/tgapp-tgcomments',
     keywords='turbogears2.application',
-    setup_requires=["PasteScript >= 1.7"],
+    setup_requires=[],
     paster_plugins=[],
     packages=find_packages(exclude=['ez_setup']),
     install_requires=install_requires,
