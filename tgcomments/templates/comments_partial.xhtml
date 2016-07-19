@@ -1,0 +1,56 @@
+<div xmlns:py="http://genshi.edgewall.org/"
+     xmlns:xi="http://www.w3.org/2001/XInclude"
+     class="tgcomments_box">
+    <div class="tgcomments_form" py:if="request.identity or allow_anonymous">
+        <form action="${h.plug_url('tgcomments', '/new')}" method="POST">
+            <input type="hidden" name="entity_type" value="${entity_type}"/>
+            <input type="hidden" name="entity_id" value="${entity_id}"/>
+            <table>
+                <tr py:if="not request.identity">
+                    <td class="tgcomments_form_label">Author:</td>
+                    <td><input type="text" name="author"/></td>
+                </tr>
+                <tr py:if="not request.identity">
+                    <td class="tgcomments_form_label">Email:</td>
+                    <td><input type="text" name="email"/></td>
+                </tr>
+                <tr py:if="request.identity">
+                    <td><img style="height:32px;"
+                             src="${h.tgcomments.get_user_avatar(request.identity['user'])}"/></td>
+                    <td>${request.identity['user'].display_name}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <textarea name="body" placeholder="post your comment here"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input type="submit" value="Submit"/></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="tgcomments_comments">
+        <div py:for="comment in comments" class="tgcomments_comment ${comment.hidden and 'tgcomments_hidden' or ''}">
+            <div class="tgcomments_comment_head">
+                <div class="tgcomments_comment_avatar">
+                    <img style="height:32px;" src="${comment.author_pic}"/>
+                </div>
+                <div class="tgcomments_comment_author ${}">
+                    <span>${comment.author_name}</span>
+                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
+                       href="${h.plug_url('tgcomments', '/hide/%s'%comment.uid)}">
+                        <img src="${tg.url('/_pluggable/tgcomments/images/hide.gif')}"/>
+                    </a>
+                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
+                       href="${h.plug_url('tgcomments', '/delete/%s'%comment.uid)}"
+                       onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
+                        <img src="${tg.url('/_pluggable/tgcomments/images/trash.gif')}"/>
+                    </a>
+                </div>
+            </div>
+            <div class="tgcomments_comment_body">${comment.body}</div>
+        </div>
+    </div>
+</div>

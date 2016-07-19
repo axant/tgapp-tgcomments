@@ -1,4 +1,4 @@
 recursive-include tgcomments/public *
-recursive-include tgcomments/templates *.html
+recursive-include tgcomments/templates *.html *.xhtml
 global-exclude *.pyc
 
