@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
-from sqlalchemy.exc import IntegrityError
-
 from tg import TGController
 from tg import expose, flash, require, url, lurl, request, redirect, validate, config
 from tg.exceptions import HTTPForbidden, HTTPRedirection
@@ -20,7 +18,7 @@ except ImportError:
 from tgext.pluggable import app_model
 
 from formencode.validators import Email, String, Invalid, Int
-from tgext.datahelpers.validators import SQLAEntityConverter
+from tgext.datahelpers.validators import EntityConverter
 from tgext.datahelpers.utils import fail_with
 
 def back_to_referer(message=None, status='ok', *args, **kw):
@@ -68,7 +66,7 @@ class RootController(TGController):
 
     @expose()
     @require(predicates.in_group('tgcmanager'))
-    @validate({'comment':SQLAEntityConverter(Comment)},
+    @validate({'comment':EntityConverter(Comment)},
               error_handler=fail_with(404))
     def delete(self, comment):
         DBSession.delete(comment)
@@ -76,7 +74,7 @@ class RootController(TGController):
 
     @expose()
     @require(predicates.in_group('tgcmanager'))
-    @validate({'comment':SQLAEntityConverter(Comment)},
+    @validate({'comment':EntityConverter(Comment)},
               error_handler=fail_with(404))
     def hide(self, comment):
         comment.hidden = not comment.hidden
@@ -86,10 +84,12 @@ class RootController(TGController):
 
     @expose()
     @require(predicates.not_anonymous())
-    @validate({'comment':SQLAEntityConverter(Comment),
+    @validate({'comment':EntityConverter(Comment),
                'value':Int(not_empty=True)},
               error_handler=fail_with(403))
     def vote(self, comment, value):
+        from sqlalchemy.exc import IntegrityError
+
         user = request.identity['user']
         vote = DBSession.query(CommentVote).filter_by(comment=comment, user=user).first()
         if vote is None:
@@ -108,4 +108,3 @@ class RootController(TGController):
             transaction.doom()
             return back_to_referer(_('Already voted this comment'), 'warning')
         return back_to_referer(_('Thanks for your vote!'))
-

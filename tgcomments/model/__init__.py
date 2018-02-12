@@ -1,12 +1,32 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy.ext.declarative import declarative_base
+import tg
 from tgext.pluggable import PluggableSession
+import logging
+
+log = logging.getLogger(__name__)
 
 DBSession = PluggableSession()
-DeclarativeBase = declarative_base()
+provider = None
+
+Comment = None
+CommentVote = None
 
 def init_model(app_session):
     DBSession.configure(app_session)
 
-from models import Comment, CommentVote
 
+def configure_models():
+    global provider, Comment, CommentVote
+
+    if tg.config.get('use_sqlalchemy', False):
+        log.info('Configuring TGComments for SQLAlchemy')
+        from tgcomments.model.sqla.models import Comment, CommentVote
+        from sprox.sa.provider import SAORMProvider
+        provider = SAORMProvider(session=DBSession, engine=False)
+    elif tg.config.get('use_ming', False):
+        log.info('Configuring TGComments for Ming')
+        from tgcomments.model.ming.models import Comment, CommentVote
+        from sprox.mg.provider import MingProvider
+        provider = MingProvider(DBSession)
+    else:
+        raise ValueError('TGComments should be used with sqlalchemy or ming')

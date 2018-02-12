@@ -4,12 +4,14 @@ import tg
 from sqlalchemy import Table, ForeignKey, Column
 from sqlalchemy.types import Unicode, Integer, DateTime, UnicodeText, Boolean, String
 from sqlalchemy.orm import backref, relation
+from tg.predicates import has_permission, in_group
 
 from tgcomments.model import DeclarativeBase, DBSession
 from tgcomments.lib import get_user_avatar
 from tgext.pluggable import app_model, primary_key
 
 from datetime import datetime
+
 
 class Comment(DeclarativeBase):
     __tablename__ = 'tgcomments_comments'
@@ -55,10 +57,15 @@ class Comment(DeclarativeBase):
                                        .filter_by(entity_id=entity_id)
 
         if not (hidden==True or \
-                (hidden=='auto' and tg.request.identity and 'tgcmanager' in tg.request.identity['groups'])):
+                (hidden=='auto' and tg.request.identity and cls.manager_permission())):
             comments = comments.filter_by(hidden=False)
 
         return comments.order_by(cls.created_at.desc()).all()
+
+
+    @staticmethod
+    def manager_permission():
+        return in_group('tgcmanager') or has_permission('tgcmanager')
 
     @classmethod
     def add_comment(cls, entity, user, body):
@@ -76,6 +83,7 @@ class Comment(DeclarativeBase):
         DBSession.add(c)
         return c
 
+
 class CommentVote(DeclarativeBase):
     __tablename__ = 'tgcomments_comments_votes'
     __table_args__ = (Index('idx_comment_voter', "comment_id", "user_id", unique=True), )
@@ -89,5 +97,3 @@ class CommentVote(DeclarativeBase):
 
     comment_id = Column(Integer, ForeignKey(Comment.uid), nullable=False)
     comment = relation(Comment, backref=backref('votes'))
-
-

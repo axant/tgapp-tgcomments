@@ -4,14 +4,28 @@
 from tgcomments import model
 from tgext.pluggable import app_model
 
+import logging
+
+log = logging.getLogger(__name__)
+
+
 def bootstrap(command, conf, vars):
-    print 'Bootstrapping tgcomments...'
+    log.info('Bootstrapping tgcomments...')
 
-    g = app_model.Group(group_name='tgcmanager', display_name='TGComments manager')
-    model.DBSession.add(g)
-    model.DBSession.flush()
+    p = app_model.Permission(
+        permission_name='tgcomments-manager',
+        description='Permits to manage comments',
+    )
 
-    u1 = model.DBSession.query(app_model.User).filter_by(user_name='manager').first()
-    if u1:
-        g.users.append(u1)
+    g = app_model.Group(
+        group_name='tgcmanager',
+        display_name='TGComments manager'
+    )
+
+    try:
+        model.DBSession.add(p)
+        model.DBSession.add(g)
+    except AttributeError:
+        # mute ming complaints
+        pass
     model.DBSession.flush()
