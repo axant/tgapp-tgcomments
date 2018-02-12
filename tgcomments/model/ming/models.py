@@ -2,8 +2,9 @@ from ming import schema as s
 from ming.odm import FieldProperty, ForeignIdProperty, RelationProperty
 from ming.odm.declarative import MappedClass
 from tgcomments import model
-from tgext.pluggable import app_model, primary_key
+from tgext.pluggable import app_model, primary_key, instance_primary_key
 from tg.predicates import has_permission, in_group
+from tgcomments.lib import get_user_avatar
 from datetime import datetime
 import tg
 
@@ -23,8 +24,8 @@ class Comment(MappedClass):
     user_id = FieldProperty(s.ObjectId)
     user = ForeignIdProperty(app_model.User)
 
-    author_name = FieldProperty(s.String, required=True)
-    author_pic = FieldProperty(s.String, required=True)
+    author_name = FieldProperty(s.String, if_missing='Anonymous')
+    author_pic = FieldProperty(s.String, if_missing='')
 
     entity_id = FieldProperty(s.ObjectId, required=True)
     entity_type = FieldProperty(s.String, required=True)
@@ -58,15 +59,12 @@ class Comment(MappedClass):
 
         comments = model.provider.query(cls, filters={'entity_type': entity_type,
                                                  'entity_id': entity_id})[1]
-        # comments = DBSession.query(cls).filter_by(entity_type=entity_type)\
-        #                                .filter_by(entity_id=entity_id)
 
-        if not (hidden == True or \
+        if not (hidden == True or
                 (hidden == 'auto' and tg.request.identity and cls.manager_permission())):
-            comments = (comment for comment in comments if comment.hidden)
+            comments = (comment for comment in comments if not comment.hidden)
 
-        comments = sorted(comments, key=cls.created_at, reverse=True)
-        return comments
+        return sorted(comments, key=lambda c: c.created_at, reverse=True)
 
     @staticmethod
     def manager_permission():
@@ -75,18 +73,18 @@ class Comment(MappedClass):
     @classmethod
     def add_comment(cls, entity, user, body):
         entity_type, entity_id = cls.get_entity_descriptor(entity)
-        c = Comment(body=body, entity_type=entity_type, entity_id=entity_id)
 
+        c = dict(body=body, entity_type=entity_type, entity_id=entity_id)
         if isinstance(user, dict):
-            c.author_name = user['name']
-            c.author_pic = user.get('avatar')
+            c['author_name'] = user['name']
+            c['author_pic'] = user.get('avatar')
         else:
-            c.user = user
-            c.author_name = user.display_name
-            c.author_pic = get_user_avatar(user)
+            c['user_id'] = instance_primary_key(user)
+            c['user'] = instance_primary_key(user)
+            c['author_name'] = user.display_name
+            c['author_pic'] = get_user_avatar(user)
 
-        model.DBSession.add(c)
-        return c
+        return model.provider.create(cls, c)
 
 
 class CommentVote(MappedClass):

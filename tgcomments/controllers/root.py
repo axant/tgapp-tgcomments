@@ -6,7 +6,6 @@ from tg.exceptions import HTTPForbidden, HTTPRedirection
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
-from tgcomments.model import DBSession, Comment, CommentVote
 from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
 import transaction
 
@@ -15,11 +14,18 @@ try:
 except ImportError:
     from repoze.what import predicates
 
-from tgext.pluggable import app_model
+from tgext.pluggable import app_model, primary_key
 
 from formencode.validators import Email, String, Invalid, Int
 from tgext.datahelpers.validators import EntityConverter
 from tgext.datahelpers.utils import fail_with
+
+def _primary_key(type):
+    pk = primary_key(type)
+    try:
+        return pk.name  # ming
+    except AttributeError:
+        return pk.key  # sqlalchemy
 
 def back_to_referer(message=None, status='ok', *args, **kw):
     if message:
@@ -47,7 +53,8 @@ class RootController(TGController):
         if issubclass(entity_type, FakeCommentEntity):
             entity = make_fake_comment_entity(entity_type, entity_id)
         else:
-            entity = DBSession.query(entity_type).get(entity_id)
+            entity = model.provider.get_obj(
+                entity_type, {_primary_key(entity_type): entity_id})
             if not entity:
                 return back_to_referer(_('Failed to post comment'), status='error')
 
@@ -60,21 +67,21 @@ class RootController(TGController):
         else:
             user = request.identity['user']
 
-        c = Comment.add_comment(entity, user, kw['body'])
+        c = model.Comment.add_comment(entity, user, kw['body'])
         notify_comment_on_facebook(request.referer, c)
         return back_to_referer(_('Comment Added'))
 
     @expose()
     @require(predicates.in_group('tgcmanager'))
-    @validate({'comment':EntityConverter(Comment)},
+    @validate({'comment':EntityConverter(model.Comment)},
               error_handler=fail_with(404))
     def delete(self, comment):
-        DBSession.delete(comment)
+        model.DBSession.delete(comment)
         return back_to_referer(_('Comment Deleted'))
 
     @expose()
     @require(predicates.in_group('tgcmanager'))
-    @validate({'comment':EntityConverter(Comment)},
+    @validate({'comment':EntityConverter(model.Comment)},
               error_handler=fail_with(404))
     def hide(self, comment):
         comment.hidden = not comment.hidden
@@ -84,7 +91,7 @@ class RootController(TGController):
 
     @expose()
     @require(predicates.not_anonymous())
-    @validate({'comment':EntityConverter(Comment),
+    @validate({'comment':EntityConverter(model.Comment),
                'value':Int(not_empty=True)},
               error_handler=fail_with(403))
     def vote(self, comment, value):
