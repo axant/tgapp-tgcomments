@@ -69,7 +69,7 @@ class RootController(TGController):
                 user = {'name':String(not_empty=True).to_python(kw.get('author')),
                         'avatar':get_user_gravatar(Email(not_empty=True).to_python(kw.get('email')))}
             except Invalid:
-                return back_to_referer(_('Invalid Comment Author'), status='error')
+                return back_to_referer(_('A name and an email are required in order to comment'), status='error')
         else:
             user = request.identity['user']
 

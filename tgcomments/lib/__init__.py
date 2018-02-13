@@ -17,7 +17,7 @@ def get_user_gravatar(user):
     mhash = md5(user).hexdigest()
     return url('http://www.gravatar.com/avatar/'+mhash, params=dict(s=32))
 
-def get_user_avatar(user):
+def _get_user_avatar(user):
     author_pic = getattr(user, 'avatar', None)
     if author_pic is None:
         author_pic = get_user_gravatar(user)
@@ -25,6 +25,9 @@ def get_user_avatar(user):
         if fbauth:
             author_pic = fbauth.profile_picture
     return author_pic
+
+def get_user_avatar(user):
+    return config['_pluggable_tgcomments_config'].get('get_user_avatar', _get_user_avatar)(user)
 
 def notify_comment_on_facebook(url, comment):
     notify_faceook = config['_pluggable_tgcomments_config'].get('notify_facebook', True)

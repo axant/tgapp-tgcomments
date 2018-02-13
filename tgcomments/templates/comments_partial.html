@@ -5,65 +5,61 @@
         <form action="${h.plug_url('tgcomments', '/new')}" method="POST">
             <input type="hidden" name="entity_type" value="${entity_type}"/>
             <input type="hidden" name="entity_id" value="${entity_id}"/>
-            <table>
-                <tr py:if="not request.identity">
-                    <td class="tgcomments_form_label">Author:</td>
-                    <td><input type="text" name="author"/></td>
-                </tr>
-                <tr py:if="not request.identity">
-                    <td class="tgcomments_form_label">Email:</td>
-                    <td><input type="text" name="email"/></td>
-                </tr>
-                <tr py:if="request.identity">
-                    <td><img style="height:32px;"
-                             src="${h.tgcomments.get_user_avatar(request.identity['user'])}"/></td>
-                    <td>${request.identity['user'].display_name}</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <textarea name="body" placeholder="post your comment here"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><input type="submit" value="Submit"/></td>
-                </tr>
-            </table>
+            <div py:if="not request.identity">
+                <label class="tgcomments_form_label" for="author">Author:</label>
+                <input type="text" name="author" placeholder="John Doe"/>
+                <label class="tgcomments_form_label" for="email">Email:</label>
+                <input type="text" name="email" placeholder="john.doe@example.org"/>
+            </div>
+            <div py:if="request.identity" class="tgcomments-commenting-user">
+                <div class="tgcomments-commenting-user-avatar">
+                    <img style="height:32px;"
+                         src="${h.tgcomments.get_user_avatar(request.identity['user'])}"/>
+                </div>
+                <div class="tgcomments-commenting-user-name">${request.identity['user'].display_name}</div>
+            </div>
+            <textarea name="body" placeholder="post your comment here"></textarea>
+            <input type="submit" value="Submit"/>
         </form>
     </div>
     <div class="tgcomments_comments">
         <div py:for="comment in comments" class="tgcomments_comment ${comment.hidden and 'tgcomments_hidden' or ''}">
             <div class="tgcomments_comment_head">
-                <div class="tgcomments_comment_avatar">
-                    <img style="height:32px;" src="${comment.author_pic}"/>
-                </div>
                 <div class="tgcomments_comment_author">
-                    <span>${comment.author_name}</span>
-                    <a py:if="h.tgcomments.manager_permission()"
-                       href="${h.plug_url('tgcomments', '/hide/%s' % h.tgcomments.instance_primary_key(comment))}">
-                        <img src="${tg.url('/_pluggable/tgcomments/images/hide.gif')}"/>
-                    </a>
-                    <a py:if="h.tgcomments.manager_permission()"
-                       href="${h.plug_url('tgcomments', '/delete/%s' % h.tgcomments.instance_primary_key(comment))}"
-                       onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
-                        <img src="${tg.url('/_pluggable/tgcomments/images/trash.gif')}"/>
-                    </a>
+                    <div class="tgcomments_comment_avatar">
+                        <img style="height:32px;" src="${comment.author_pic}"/>
+                    </div>
+                    <div class="tgcomments-author-name">${comment.author_name}</div>
+                    <div class="tgcomments-creation-date">${h.tgcomments.pretty_date(comment.created_at)}</div>
+                </div>
+                <div class="tgcomments-buttons">
+                    <span class="tgcomments-manage-buttons">
+                        <a py:if="h.tgcomments.manager_permission()"
+                           href="${h.plug_url('tgcomments', '/hide/%s' % h.tgcomments.instance_primary_key(comment))}">
+                            <img src="${tg.url('/_pluggable/tgcomments/images/hide.gif') if not comment.hidden else tg.url('/_pluggable/tgcomments/images/show.gif')}"/>
+                        </a>
+                        <a py:if="h.tgcomments.manager_permission()"
+                           href="${h.plug_url('tgcomments', '/delete/%s' % h.tgcomments.instance_primary_key(comment))}"
+                           onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
+                            <img src="${tg.url('/_pluggable/tgcomments/images/trash.gif')}"/>
+                        </a>
+                    </span>
                     <span class="votesbox ${h.tgcomments.upvoted_or_downvoted(comment)}">
-                      <span class="votebtn upvote">
-                          ${len(comment.votes_by_value(1))}
-                          <a py:strip="not request.identity"
-                             href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=1))}">
-                              <span class="tgcomments-upvote">Λ</span>
-                          </a>
-                      </span>
-                      <span class="votebtn downvote">
-                          ${len(comment.votes_by_value(-1))}
-                          <a py:strip="not request.identity"
-                             href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=-1))}">
-                              <span class="tgcomments-downvote">V</span>
-                          </a>
-                      </span>
-                  </span>
+                        <span class="votebtn upvote">
+                            <span class="tgcomments-upvote-count">${len(comment.votes_by_value(1))}</span>
+                            <a py:strip="not request.identity"
+                               href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=1))}">
+                                <span class="tgcomments-upvote">Λ</span>
+                            </a>
+                        </span>
+                        <span class="votebtn downvote">
+                            <span py:if="len(comment.votes_by_value(-1)) != 0" class="tgcomments-downvote-count">-${len(comment.votes_by_value(-1))}</span>
+                            <a py:strip="not request.identity"
+                               href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=-1))}">
+                                <span class="tgcomments-downvote">V</span>
+                            </a>
+                        </span>
+                    </span>
                 </div>
             </div>
             <div class="tgcomments_comment_body">${comment.body}</div>
