@@ -29,9 +29,9 @@ Then at the *end of the file* call plug with tgcomments::
     plug(base_config, 'tgcomments')
 
 
-To expose comments support for an entity, just call 
-the ``comments_for(entity)``  partial for 
-that entity inside your templates as explained in the 
+To expose comments support for an entity, just call
+the ``comments_for(entity)``  partial for
+that entity inside your templates as explained in the
 **Exposed Partials** section.
 
 Exposed Partials
@@ -42,7 +42,7 @@ to render pieces of the blogging system anywhere in your
 application:
 
 - ``tgcomments.partials:comments_for(entity)``
-    Given any SQLAlchemy entity which is available inside your application ``model`` module
+    Given any SQLAlchemy or Ming entity (instance) which is available inside your application ``model`` module
     it will display a list of comments for that entity with a box to add a new comment.
 
 Provided Options
@@ -55,6 +55,11 @@ to change its behavior:
     the user wrote if he has logged using Facebook
 - *allow_anonymous* (default:True) allow anonymous users to comment
 
+- *pretty_date* a function that will be used to properly format dates (example: "5 minutes ago")
+
+- *get_user_avatar* a function that will be used to get the avatar (by default searches
+for the ``avatar`` property, then fallbacks for fb information, then fallbacks gravatar)
+
 Exposed Templates
 --------------------
 
@@ -62,3 +67,8 @@ The templates used by registration and that can be replaced with
 *tgext.pluggable.replace_template* are:
 
 - ``tgcomments.templates.comments_partial``
+
+Changelog
+---------
+
+- ``0.2.0`` - introduced compatibility with ming

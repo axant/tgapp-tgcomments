@@ -22,12 +22,12 @@ except IOError:
 
 setup(
     name='tgapp-tgcomments',
-    version='0.1.0',
+    version='0.2.0',
     description='TurboGears2 pluggable application for comments to entities with facebook sharing',
     long_description=README,
-    author='Alessandro Molina',
-    author_email='alessandro.molina@axant.it',
-    url='https://bitbucket.org/_amol_/tgapp-tgcomments',
+    author='Alessandro Molina, Vincenzo Castiglia',
+    author_email='alessandro.molina@axant.it, vincenzo.castiglia@axant.it',
+    url='https://github.com/axant/tgapp-tgcomments',
     keywords='turbogears2.application',
     setup_requires=[],
     paster_plugins=[],
