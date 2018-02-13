@@ -37,17 +37,33 @@
                 <div class="tgcomments_comment_avatar">
                     <img style="height:32px;" src="${comment.author_pic}"/>
                 </div>
-                <div class="tgcomments_comment_author ${}">
+                <div class="tgcomments_comment_author">
                     <span>${comment.author_name}</span>
-                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
-                       href="${h.plug_url('tgcomments', '/hide/%s'%comment.uid)}">
+                    <a py:if="h.tgcomments.manager_permission()"
+                       href="${h.plug_url('tgcomments', '/hide/%s' % h.tgcomments.instance_primary_key(comment))}">
                         <img src="${tg.url('/_pluggable/tgcomments/images/hide.gif')}"/>
                     </a>
-                    <a py:if="request.identity and 'tgcmanager' in request.identity['groups']"
-                       href="${h.plug_url('tgcomments', '/delete/%s'%comment.uid)}"
+                    <a py:if="h.tgcomments.manager_permission()"
+                       href="${h.plug_url('tgcomments', '/delete/%s' % h.tgcomments.instance_primary_key(comment))}"
                        onclick="return confirm('Permanently delete comment of ${comment.author_name}');">
                         <img src="${tg.url('/_pluggable/tgcomments/images/trash.gif')}"/>
                     </a>
+                    <span class="votesbox ${h.tgcomments.upvoted_or_downvoted(comment)}">
+                      <span class="votebtn upvote">
+                          ${len(comment.votes_by_value(1))}
+                          <a py:strip="not request.identity"
+                             href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=1))}">
+                              <span class="tgcomments-upvote">Λ</span>
+                          </a>
+                      </span>
+                      <span class="votebtn downvote">
+                          ${len(comment.votes_by_value(-1))}
+                          <a py:strip="not request.identity"
+                             href="${h.plug_url('tgcomments', '/vote', params=dict(comment=h.tgcomments.instance_primary_key(comment), value=-1))}">
+                              <span class="tgcomments-downvote">V</span>
+                          </a>
+                      </span>
+                  </span>
                 </div>
             </div>
             <div class="tgcomments_comment_body">${comment.body}</div>

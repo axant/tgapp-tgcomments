@@ -4,7 +4,7 @@ from ming.odm.declarative import MappedClass
 from tgcomments import model
 from tgext.pluggable import app_model, primary_key, instance_primary_key
 from tg.predicates import has_permission, in_group
-from tgcomments.lib import get_user_avatar
+from tgcomments.lib import get_user_avatar, manager_permission
 from datetime import datetime
 import tg
 
@@ -13,7 +13,7 @@ class Comment(MappedClass):
     class __mongometa__:
         session = model.DBSession
         name = 'tgcomments_comments'
-        indexes = [('idx_commented_entity', 'entity_type', 'entity_id', )]
+        indexes = [('entity_type', 'entity_id', )]
 
     _id = FieldProperty(s.ObjectId)
 
@@ -36,16 +36,19 @@ class Comment(MappedClass):
 
     @property
     def voters(self):
-        return (vote.user for vote in self.votes)
-        #return DBSession.query(app_model.User).join(CommentVote).filter(CommentVote.comment_id==self.uid)
+        return [vote.user for vote in self.votes]
+
+    @property
+    def my_vote(self):
+        values = [vote.value for vote in self.votes if vote.user_id == instance_primary_key(tg.request.identity['user'])]
+        return values[0] if len(values) != 0 else None
 
     @property
     def rank(self):
         return sum((v.value for v in self.votes))
 
     def votes_by_value(self, v):
-        return (vote for vote in self.votes if vote.value == v)
-        #return DBSession.query(CommentVote).filter_by(comment_id=self.uid).filter_by(value=v)
+        return [vote for vote in self.votes if vote.value == v]
 
     @classmethod
     def get_entity_descriptor(cls, entity):
@@ -60,15 +63,10 @@ class Comment(MappedClass):
         comments = model.provider.query(cls, filters={'entity_type': entity_type,
                                                  'entity_id': entity_id})[1]
 
-        if not (hidden == True or
-                (hidden == 'auto' and tg.request.identity and cls.manager_permission())):
+        if not (hidden == True or (hidden == 'auto' and manager_permission())):
             comments = (comment for comment in comments if not comment.hidden)
 
         return sorted(comments, key=lambda c: c.created_at, reverse=True)
-
-    @staticmethod
-    def manager_permission():
-        return in_group('tgcmanager') or has_permission('tgcmanager')
 
     @classmethod
     def add_comment(cls, entity, user, body):
@@ -91,7 +89,7 @@ class CommentVote(MappedClass):
     class __mongometa__:
         session = model.DBSession
         name = 'tgcomments_comments_votes'
-        unique_indexes = [('idx_comment_voter', "comment_id", "user_id", )]
+        unique_indexes = [("_id", "comment_id", "user_id", )]
 
     _id = FieldProperty(s.ObjectId)
 

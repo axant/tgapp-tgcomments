@@ -13,7 +13,7 @@ def bootstrap(command, conf, vars):
     log.info('Bootstrapping tgcomments...')
 
     p = app_model.Permission(
-        permission_name='tgcomments-manager',
+        permission_name='tgcomments-manage',
         description='Permits to manage comments',
     )
 

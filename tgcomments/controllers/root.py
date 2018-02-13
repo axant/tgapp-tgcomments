@@ -1,24 +1,30 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
 from tg import TGController
-from tg import expose, flash, require, url, lurl, request, redirect, validate, config
+from tg import expose, flash, require, url, lurl, request, redirect, validate, config, abort
 from tg.exceptions import HTTPForbidden, HTTPRedirection
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
-from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity
+from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity, manager_permission
 import transaction
 
-try:
-    from tg import predicates
-except ImportError:
-    from repoze.what import predicates
-
-from tgext.pluggable import app_model, primary_key
+from tgext.pluggable import app_model, primary_key, instance_primary_key
 
 from formencode.validators import Email, String, Invalid, Int
-from tgext.datahelpers.validators import EntityConverter
 from tgext.datahelpers.utils import fail_with
+from tg.predicates import not_anonymous
+from datetime import datetime
+
+try:
+    from tgext.datahelpers.validators import MingEntityConverter as EntityConverter
+except ImportError:
+    from tgext.datahelpers.validators import SQLAEntityConverter as EntityConverter
+
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def _primary_key(type):
     pk = primary_key(type)
@@ -27,7 +33,7 @@ def _primary_key(type):
     except AttributeError:
         return pk.key  # sqlalchemy
 
-def back_to_referer(message=None, status='ok', *args, **kw):
+def back_to_referer(message=None, status=None, *args, **kw):
     if message:
         flash(message, status)
     if request.referer is not None:
@@ -72,15 +78,14 @@ class RootController(TGController):
         return back_to_referer(_('Comment Added'))
 
     @expose()
-    @require(predicates.in_group('tgcmanager'))
-    @validate({'comment':EntityConverter(model.Comment)},
-              error_handler=fail_with(404))
+    @require(manager_permission())
     def delete(self, comment):
-        model.DBSession.delete(comment)
+        primary_field = model.provider.get_primary_field(model.Comment)
+        model.provider.delete(model.Comment, {primary_field: comment})
         return back_to_referer(_('Comment Deleted'))
 
     @expose()
-    @require(predicates.in_group('tgcmanager'))
+    @require(manager_permission())
     @validate({'comment':EntityConverter(model.Comment)},
               error_handler=fail_with(404))
     def hide(self, comment):
@@ -90,28 +95,34 @@ class RootController(TGController):
         return back_to_referer(_('Comment Displayed'))
 
     @expose()
-    @require(predicates.not_anonymous())
+    @require(not_anonymous())
     @validate({'comment':EntityConverter(model.Comment),
                'value':Int(not_empty=True)},
-              error_handler=fail_with(403))
+              error_handler=fail_with(404))
     def vote(self, comment, value):
-        from sqlalchemy.exc import IntegrityError
-
         user = request.identity['user']
-        vote = DBSession.query(CommentVote).filter_by(comment=comment, user=user).first()
+        user_votes = [vote for vote in comment.votes if vote.user_id == instance_primary_key(user)]
+        vote = user_votes[0] if len(user_votes) != 0 else None
+
+        min_vote_value, max_vote_value = config['_pluggable_tgcom'
+            'ments_config'].get('votes_range', (-1, 1))
+        value = min(max(min_vote_value, value), max_vote_value)
+
         if vote is None:
-            vote = CommentVote(comment=comment, user=user)
-            DBSession.add(vote)
-
-        votes_range = config['_pluggable_tgcomments_config'].get('votes_range', (-1, 1))
-        min_vote_value = votes_range[0]
-        max_vote_value = votes_range[1]
-
-        vote.value = min(max(min_vote_value, value), max_vote_value)
-
-        try:
-            DBSession.flush()
-        except IntegrityError:
-            transaction.doom()
-            return back_to_referer(_('Already voted this comment'), 'warning')
+            try:
+                vote = model.provider.create(model.CommentVote, dict(
+                    comment_id=instance_primary_key(comment),
+                    user_id=instance_primary_key(user),
+                    created_at=datetime.utcnow(),
+                    value=value,
+                ))
+            except Exception as e:
+                log.error(e)
+                return back_to_referer(_('Already voted this comment'), status='error')
+        else:
+            if vote.value != value:
+                vote.value = value
+                return back_to_referer(_('Vote updated'))
+            else:
+                return back_to_referer(_('Already voted this comment'), status='warning')
         return back_to_referer(_('Thanks for your vote!'))

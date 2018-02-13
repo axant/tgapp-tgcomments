@@ -1,0 +1,9 @@
+/* this is an example by default this file isn't included into your project */
+
+.upvoted span a span.tgcomments-upvote {
+  color: blue;
+}
+
+.downvoted span a span.tgcomments-downvote {
+  color: blue;
+}

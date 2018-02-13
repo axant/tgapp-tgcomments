@@ -8,7 +8,7 @@ from tg.predicates import has_permission, in_group
 
 from tgcomments.model import DeclarativeBase, DBSession
 from tgcomments.lib import get_user_avatar
-from tgext.pluggable import app_model, primary_key
+from tgext.pluggable import app_model, primary_key, instance_primary_key
 
 from datetime import datetime
 
@@ -35,6 +35,11 @@ class Comment(DeclarativeBase):
     @property
     def voters(self):
         return DBSession.query(app_model.User).join(CommentVote).filter(CommentVote.comment_id==self.uid)
+
+    @property
+    def my_vote(self):
+        values = [vote.value for vote in self.votes if vote.user_id == instance_primary_key(tg.request.identity['user'])]
+        return values[0] if len(values) != 0 else None
 
     @property
     def rank(self):

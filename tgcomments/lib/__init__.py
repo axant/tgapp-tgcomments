@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from hashlib import md5
-from tg import url, config
+from tg import url, config, request
 import json
 from urllib import urlopen, urlencode
 from contextlib import closing
 from collections import namedtuple
+
+def manager_permission():
+    from tg.predicates import in_group, has_permission, Any
+    return Any(in_group('tgcmanager'), has_permission('tgcomments-manage'))
 
 def get_user_gravatar(user):
     if not isinstance(user, basestring):
