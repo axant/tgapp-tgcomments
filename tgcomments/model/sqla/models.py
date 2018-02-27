@@ -26,6 +26,7 @@ class Comment(DeclarativeBase):
     user_id = Column(Integer, ForeignKey(primary_key(app_model.User)), nullable=True)
     user = relation(app_model.User, backref=backref('comments'))
 
+    author_username = Column(Unicode(2048), default='anon')
     author_name = Column(Unicode(2048), nullable=False)
     author_pic = Column(Unicode(2048), nullable=True)
 
@@ -78,10 +79,12 @@ class Comment(DeclarativeBase):
         c = Comment(body=body, entity_type=entity_type, entity_id=entity_id)
 
         if isinstance(user, dict):
+            c.author_username = user.get('user_name')
             c.author_name = user['name']
             c.author_pic = user.get('avatar')
         else:
             c.user = user
+            c.author_username = user.user_name
             c.author_name = user.display_name
             c.author_pic = get_user_avatar(user)
 

@@ -21,9 +21,10 @@ class Comment(MappedClass):
     created_at = FieldProperty(s.DateTime, if_missing=datetime.now)
     hidden = FieldProperty(s.Bool, if_missing=False)
 
-    user_id = FieldProperty(s.ObjectId)
-    user = ForeignIdProperty(app_model.User)
+    user_id = ForeignIdProperty(app_model.User)
+    user = RelationProperty(app_model.User)
 
+    author_username = FieldProperty(s.String, if_missing='anon')
     author_name = FieldProperty(s.String, if_missing='Anonymous')
     author_pic = FieldProperty(s.String, if_missing='')
 
@@ -74,11 +75,13 @@ class Comment(MappedClass):
 
         c = dict(body=body, entity_type=entity_type, entity_id=entity_id)
         if isinstance(user, dict):
+            c['author_username'] = user['user_name']
             c['author_name'] = user['name']
             c['author_pic'] = user.get('avatar')
         else:
             c['user_id'] = instance_primary_key(user)
-            c['user'] = instance_primary_key(user)
+            c['user'] = user
+            c['author_username'] = user.user_name
             c['author_name'] = user.display_name
             c['author_pic'] = get_user_avatar(user)
 

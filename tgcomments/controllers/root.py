@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
 from tg import TGController
-from tg import expose, flash, require, url, lurl, request, redirect, validate, config, abort
-from tg.exceptions import HTTPForbidden, HTTPRedirection
+from tg import expose, flash, require, request, redirect, validate, config
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
-from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook, make_fake_comment_entity, FakeCommentEntity, manager_permission
-import transaction
+from tgcomments.lib import get_user_gravatar, notify_comment_on_facebook,\
+    make_fake_comment_entity, FakeCommentEntity, manager_permission
 
 from tgext.pluggable import app_model, primary_key, instance_primary_key
 
@@ -32,6 +31,7 @@ def _primary_key(type):
         return pk.name  # ming
     except AttributeError:
         return pk.key  # sqlalchemy
+
 
 def back_to_referer(message=None, status=None, *args, **kw):
     if message:
