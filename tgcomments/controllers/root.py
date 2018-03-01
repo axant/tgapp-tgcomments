@@ -46,9 +46,9 @@ class RootController(TGController):
         back_to_referer(l_('Please provide comment details'), 'error')
 
     @expose()
-    @validate({'entity_type':String(not_empty=True),
-               'entity_id':String(not_empty=True),
-               'body':String(not_empty=True)},
+    @validate({'entity_type': String(not_empty=True),
+               'entity_id': String(not_empty=True),
+               'body': String(not_empty=True)},
               error_handler=new_error_handler)
     def new(self, **kw):
         entity_type = getattr(app_model, kw['entity_type'], None)
@@ -66,10 +66,14 @@ class RootController(TGController):
 
         if not request.identity:
             try:
-                user = {'name':String(not_empty=True).to_python(kw.get('author')),
-                        'avatar':get_user_gravatar(Email(not_empty=True).to_python(kw.get('email')))}
+                user = {
+                    'name': String(not_empty=True).to_python(kw.get('author')),
+                    'avatar': get_user_gravatar(Email(not_empty=True).to_python(kw.get('email'))),
+                    'user_name': 'anon',
+                }
             except Invalid:
-                return back_to_referer(_('A name and an email are required in order to comment'), status='error')
+                return back_to_referer(_('A name and an email are required in order to comment'),
+                                       status='error')
         else:
             user = request.identity['user']
 

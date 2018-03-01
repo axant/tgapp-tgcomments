@@ -71,5 +71,7 @@ The templates used by registration and that can be replaced with
 Changelog
 ---------
 
+- ``0.2.2`` - fixed anon comment creation broken by v0.2.1, used pre instead of div to
+    display the comment body, so it keeps newlines
 - ``0.2.1`` - fixed ming relation with User and added author_username
 - ``0.2.0`` - introduced compatibility with ming
