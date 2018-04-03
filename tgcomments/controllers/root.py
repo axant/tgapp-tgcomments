@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Main Controller"""
 from tg import TGController
-from tg import expose, flash, require, request, redirect, validate, config
+from tg import expose, flash, require, request, redirect, validate, config, hooks
 from tg.i18n import ugettext as _, lazy_ugettext as l_
 
 from tgcomments import model
@@ -77,6 +77,7 @@ class RootController(TGController):
         else:
             user = request.identity['user']
 
+        hooks.notify('tgcomments.before_add', args=(entity, user, kw))
         c = model.Comment.add_comment(entity, user, kw['body'])
         notify_comment_on_facebook(request.referer, c)
         return back_to_referer(_('Comment Added'))

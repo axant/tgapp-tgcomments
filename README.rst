@@ -68,9 +68,18 @@ The templates used by registration and that can be replaced with
 
 - ``tgcomments.templates.comments_partial``
 
+Available Hooks
+-------------
+TGComments exposes some hooks to configure it's behavior, The hooks that can be
+used with TurboGears2 register_hook are:
+
+- ``tgcomments.before_add(entity, user, kw)`` - called before adding a comment. kw['body'] can be modified here
+
+
 Changelog
 ---------
 
+- ``0.2.3`` - added ``tgcomments.before_add`` hook
 - ``0.2.2`` - fixed anon comment creation broken by v0.2.1, used pre instead of div to
     display the comment body, so it keeps newlines
 - ``0.2.1`` - fixed ming relation with User and added author_username
