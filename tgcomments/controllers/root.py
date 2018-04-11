@@ -79,6 +79,7 @@ class RootController(TGController):
 
         hooks.notify('tgcomments.before_add', args=(entity, user, kw))
         c = model.Comment.add_comment(entity, user, kw['body'])
+        hooks.notify('tgcomments.after_add', args=(c,))
         notify_comment_on_facebook(request.referer, c)
         return back_to_referer(_('Comment Added'))
 
