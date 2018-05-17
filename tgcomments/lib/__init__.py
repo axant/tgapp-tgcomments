@@ -3,7 +3,8 @@ from datetime import datetime
 from hashlib import md5
 from tg import url, config, request
 import json
-from urllib import urlopen, urlencode
+from six.moves.urllib.parse import urlencode
+from six.moves.urllib.request import urlopen
 from contextlib import closing
 from collections import namedtuple
 

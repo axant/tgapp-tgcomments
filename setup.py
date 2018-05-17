@@ -11,7 +11,8 @@ except ImportError:
 install_requires=[
     "TurboGears2 >= 2.1.4",
     "tgext.pluggable",
-    'tgext.datahelpers >= 0.0.6'
+    "tgext.datahelpers >= 0.0.6",
+    "six",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
