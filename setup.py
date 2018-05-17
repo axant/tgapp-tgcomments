@@ -22,7 +22,7 @@ except IOError:
 
 setup(
     name='tgapp-tgcomments',
-    version='0.2.4',
+    version='0.2.5',
     description='TurboGears2 pluggable application for comments to entities with facebook sharing',
     long_description=README,
     author='Alessandro Molina, Vincenzo Castiglia',
@@ -37,6 +37,11 @@ setup(
     package_data={'tgapp.tgcomments': ['i18n/*/LC_MESSAGES/*.mo',
                                  'templates/*/*',
                                  'public/*/*']},
+    message_extractors={'tgcomments': [
+        ('**.py', 'python', None),
+        ('templates/**.xhtml', 'kajiki', None),
+        ('public/**', 'ignore', None),
+    ]},
     entry_points="""
     """,
     zip_safe=False

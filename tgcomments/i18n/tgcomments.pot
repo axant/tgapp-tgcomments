@@ -1,0 +1,80 @@
+# Translations template for tgapp-tgcomments.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the tgapp-tgcomments
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: tgapp-tgcomments 0.2.4\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-05-17 12:10+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: tgcomments/controllers/root.py:46
+msgid "Please provide comment details"
+msgstr ""
+
+#: tgcomments/controllers/root.py:57 tgcomments/controllers/root.py:65
+msgid "Failed to post comment"
+msgstr ""
+
+#: tgcomments/controllers/root.py:75
+msgid "A name and an email are required in order to comment"
+msgstr ""
+
+#: tgcomments/controllers/root.py:84
+msgid "Comment Added"
+msgstr ""
+
+#: tgcomments/controllers/root.py:91
+msgid "Comment Deleted"
+msgstr ""
+
+#: tgcomments/controllers/root.py:100
+msgid "Comment Hidden"
+msgstr ""
+
+#: tgcomments/controllers/root.py:101
+msgid "Comment Displayed"
+msgstr ""
+
+#: tgcomments/controllers/root.py:127 tgcomments/controllers/root.py:133
+msgid "Already voted this comment"
+msgstr ""
+
+#: tgcomments/controllers/root.py:131
+msgid "Vote updated"
+msgstr ""
+
+#: tgcomments/controllers/root.py:134
+msgid "Thanks for your vote!"
+msgstr ""
+
+#: tgcomments/templates/comments_partial.xhtml:9
+msgid "Author:"
+msgstr ""
+
+#: tgcomments/templates/comments_partial.xhtml:11
+msgid "Email:"
+msgstr ""
+
+#: tgcomments/templates/comments_partial.xhtml:52
+msgid "Λ"
+msgstr ""
+
+#: tgcomments/templates/comments_partial.xhtml:56
+msgid "-"
+msgstr ""
+
+#: tgcomments/templates/comments_partial.xhtml:59
+msgid "V"
+msgstr ""
+
