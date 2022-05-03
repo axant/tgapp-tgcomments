@@ -23,7 +23,7 @@ except IOError:
 
 setup(
     name='tgapp-tgcomments',
-    version='0.2.5',
+    version='0.2.6',
     description='TurboGears2 pluggable application for comments to entities with facebook sharing',
     long_description=README,
     author='Alessandro Molina, Vincenzo Castiglia',
