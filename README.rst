@@ -58,7 +58,7 @@ to change its behavior:
 - *pretty_date* a function that will be used to properly format dates (example: "5 minutes ago")
 
 - *get_user_avatar* a function that will be used to get the avatar (by default searches
-for the ``avatar`` property, then fallbacks for fb information, then fallbacks gravatar)
+  for the ``avatar`` property, then fallbacks for fb information, then fallbacks gravatar)
 
 Exposed Templates
 --------------------
@@ -69,7 +69,7 @@ The templates used by registration and that can be replaced with
 - ``tgcomments.templates.comments_partial``
 
 Available Hooks
--------------
+---------------
 TGComments exposes some hooks to configure it's behavior, The hooks that can be
 used with TurboGears2 register_hook are:
 
@@ -79,6 +79,7 @@ used with TurboGears2 register_hook are:
 Changelog
 ---------
 
+- ``0.2.6`` - support turbogears 2.4
 - ``0.2.3`` - added ``tgcomments.before_add`` hook
 - ``0.2.2`` - fixed anon comment creation broken by v0.2.1, used pre instead of div to
     display the comment body, so it keeps newlines
