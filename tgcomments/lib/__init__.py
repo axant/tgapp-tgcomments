@@ -13,9 +13,9 @@ def manager_permission():
     return Any(in_group('tgcmanager'), has_permission('tgcomments-manage'))
 
 def get_user_gravatar(user):
-    if not isinstance(user, basestring):
+    if not isinstance(user, str):
         user = user.email_address
-    mhash = md5(user).hexdigest()
+    mhash = md5(user.encode()).hexdigest()
     return url('http://www.gravatar.com/avatar/'+mhash, params=dict(s=32))
 
 def _get_user_avatar(user):
